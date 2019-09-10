@@ -7,11 +7,13 @@ import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ExpandableListView
 import android.widget.ListView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.Transformations.map
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -28,6 +30,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var mListView: ListView
     private lateinit var mQuestionArrayList: ArrayList<Question>
     private lateinit var mAdapter: QuestionsListAdapter
+
+
+
+
+
 
     private var mGenreRef: DatabaseReference? = null
 
@@ -63,6 +70,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 mGenre, bytes, answerArrayList)
             mQuestionArrayList.add(question)
             mAdapter.notifyDataSetChanged()
+
+
+
+
+
+
         }
 
         override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {
@@ -102,6 +115,70 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         }
     }
+
+    private val mFavoriteEventListener = object : ChildEventListener{
+
+        override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
+
+            val favoriteList = favoritelist
+
+
+            val map = dataSnapshot.value as Map<String, String>
+
+            val questionid = dataSnapshot.key
+
+            val genre = map["genre"] ?: ""
+
+
+            val title = map["title"] ?: ""
+            val body = map["body"] ?: ""
+            val name = map["name"] ?: ""
+            val uid = map["uid"] ?: ""
+            val imageString = map["image"] ?: ""
+            val bytes =
+                if (imageString.isNotEmpty()) {
+                    Base64.decode(imageString, Base64.DEFAULT)
+                } else {
+                    byteArrayOf()
+                }
+            val answerArrayList = ArrayList<Answer>()
+
+            val question = Question(title, body, name, uid, dataSnapshot.key ?: "",
+                mGenre, bytes, answerArrayList)
+
+            favoriteList.add(question)
+
+            mQuestionArrayList.add(question)
+            mAdapter.notifyDataSetChanged()
+
+
+            // 質問のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
+            mQuestionArrayList.clear()
+            mAdapter.setQuestionArrayList(mQuestionArrayList)
+            mListView.adapter = mAdapter
+
+        }
+        override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?)
+        {
+
+
+        }
+        override fun onChildRemoved(p0: DataSnapshot) {
+
+        }
+
+        override fun onChildMoved(p0: DataSnapshot, p1: String?) {
+
+        }
+
+        override fun onCancelled(p0: DatabaseError) {
+
+        }
+    }
+
+
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -156,6 +233,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             intent.putExtra("question", mQuestionArrayList[position])
             startActivity(intent)
         }
+
+        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+
+
+        var favoritedata = FirebaseDatabase.getInstance().reference.child("favorite").child(userId)
+
+
+
+        // 選択したジャンルにリスナーを登録する
+        if (favoritedata != null) {
+            favoritedata!!.removeEventListener(mFavoriteEventListener)
+        }
+
+
+        favoritedata!!.addChildEventListener(mFavoriteEventListener)
+
+
+
+
     }
 
 
@@ -197,7 +293,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
           else if (id == R.id.nav_favorite) {
         mToolbar.title = "お気に入り"
         mGenre = 5
-    }
+
+
+
+            }
+
+
+
+
+
+
+
+
+
+
+
 
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         drawer.closeDrawer(GravityCompat.START)
@@ -216,4 +326,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         return true
     }
+
+
+
 }
