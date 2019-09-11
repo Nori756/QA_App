@@ -132,9 +132,9 @@ class QuestionDetailActivity : AppCompatActivity() {
 
                 val userId = FirebaseAuth.getInstance().currentUser!!.uid
 
-                ref.child(userId).child(mQuestion.questionUid).child("genre").setValue(mQuestion.genre.toString())
+                ref.child(userId).child(mQuestion.questionUid).child("genre").removeValue()
 
-                ref.getRef().removeValue()
+
 
 
 
