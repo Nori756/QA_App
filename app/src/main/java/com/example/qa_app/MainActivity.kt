@@ -133,9 +133,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val genre = map["genre"] ?: ""
 
 
-
             mFavoriteReference =
-                mDatabaseReference.child(ContentsPATH).child(genre.toString()).child(questionid.toString())
+                mDatabaseReference.child(ContentsPATH).child(genre.toString())
 
             mFavoriteReference!!.addChildEventListener(mFavoriteListEventListener)
         }
@@ -192,6 +191,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 title, body, name, uid, dataSnapshot.key ?: "",
                 mGenre, bytes, answerArrayList
             )
+            mQuestionArrayList.clear()
             mQuestionArrayList.add(question)
             mAdapter.notifyDataSetChanged()
 

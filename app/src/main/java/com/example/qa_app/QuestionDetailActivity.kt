@@ -2,6 +2,7 @@ package com.example.qa_app
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat.startActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -12,9 +13,16 @@ import java.util.HashMap
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import androidx.fragment.app.FragmentActivity
 import kotlinx.android.synthetic.main.activity_question_detail.*
 import kotlinx.android.synthetic.main.app_bar_main.fab
 import kotlinx.android.synthetic.main.content_main.listView
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.internal.FirebaseAppHelper.getUid
+
+
 
 
 class QuestionDetailActivity : AppCompatActivity() {
@@ -99,6 +107,46 @@ class QuestionDetailActivity : AppCompatActivity() {
             }
         }
 
+        val database = FirebaseDatabase.getInstance()
+
+
+        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+
+
+
+
+        FirebaseDatabase.getInstance().reference.child("favorite").child(userId).child(mQuestion.questionUid).child("genre").addListenerForSingleValueEvent(
+            object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    // Get user value
+                    val user = dataSnapshot.getValue(userId::class.java)
+
+                   if(user == null) {
+                       flag = true
+
+
+                       val buttonTextView = button.findViewById<View>(R.id.button) as Button
+
+                       buttonTextView.text = ("お気に入り")
+
+                       Log.d("TAG", "まだお気に入りにしていない")
+                   }else{
+                       flag = false
+
+                       val buttonTextView = button.findViewById<View>(R.id.button) as Button
+                       buttonTextView.text = ("お気に入り済み")
+
+                       Log.d("TAG","お気に入り済み")
+                   }
+
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+
+
+
+                }
+            })
 
 
         button.setOnClickListener {
@@ -114,6 +162,7 @@ class QuestionDetailActivity : AppCompatActivity() {
 
 
 
+
             if(flag){
 
 
@@ -121,6 +170,7 @@ class QuestionDetailActivity : AppCompatActivity() {
 
                 buttonTextView.text = ("お気に入り")
                 flag = false
+
 
 
 
@@ -139,6 +189,7 @@ class QuestionDetailActivity : AppCompatActivity() {
 
 
             }else{
+
                 val buttonTextView = button.findViewById<View>(R.id.button) as Button
                 buttonTextView.text = ("お気に入り済み")
                 flag = true
@@ -164,6 +215,7 @@ class QuestionDetailActivity : AppCompatActivity() {
 
 
         }
+
 
 
         val user = FirebaseAuth.getInstance().currentUser
