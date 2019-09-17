@@ -335,7 +335,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         } else if (id == R.id.nav_favorite) {
             mToolbar.title = "お気に入り"
-            mGenre = 5
+
 
 
             val userId = FirebaseAuth.getInstance().currentUser!!.uid
@@ -369,11 +369,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (mGenreRef != null) {
             mGenreRef!!.removeEventListener(mEventListener)
         }
-        if (mGenre != 5) {
+
             mGenreRef = mDatabaseReference.child(ContentsPATH).child(mGenre.toString())
 
             mGenreRef!!.addChildEventListener(mEventListener)
-        }
+
         return true
     }
 
