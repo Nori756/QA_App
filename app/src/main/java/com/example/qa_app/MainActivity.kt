@@ -3,16 +3,20 @@ package com.example.qa_app
 import android.content.Intent
 import android.os.Bundle
 import android.util.Base64
+import android.util.Log
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Button
 import android.widget.ExpandableListView
 import android.widget.ListView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Transformations.map
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -38,10 +42,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private lateinit var mFavoriteReference: DatabaseReference
 
-
+    private lateinit var mQuestion: Question
 
 
     private var mGenreRef: DatabaseReference? = null
+
 
     private val mEventListener = object : ChildEventListener {
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
@@ -119,7 +124,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    private val mFavoriteEventListener = object : ChildEventListener{
+    private val mFavoriteEventListener = object : ChildEventListener {
 
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
 
@@ -139,11 +144,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             mFavoriteReference!!.addChildEventListener(mFavoriteListEventListener)
         }
 
-        override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?)
-        {
-
+        override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {
 
         }
+
         override fun onChildRemoved(p0: DataSnapshot) {
 
         }
@@ -199,9 +203,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
 
-
-
-
         override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {
 
 
@@ -227,13 +228,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         mToolbar = findViewById(R.id.toolbar)
         setSupportActionBar(mToolbar)
 
+
         val fab = findViewById<FloatingActionButton>(R.id.fab)
         fab.setOnClickListener { view ->
             // ジャンルを選択していない場合（mGenre == 0）はエラーを表示するだけ
             if (mGenre == 0) {
                 Snackbar.make(view, "ジャンルを選択して下さい", Snackbar.LENGTH_LONG).show()
             } else {
-
             }
             // ログイン済みのユーザーを取得する
             val user = FirebaseAuth.getInstance().currentUser
@@ -245,7 +246,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             } else {
                 // ジャンルを渡して質問作成画面を起動する
                 val intent = Intent(applicationContext, QuestionSendActivity::class.java)
+
                 intent.putExtra("genre", mGenre)
+
                 startActivity(intent)
             }
         }
@@ -258,6 +261,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
         navigationView.setNavigationItemSelectedListener(this)
+
 
         // Firebase
         mDatabaseReference = FirebaseDatabase.getInstance().reference
@@ -274,9 +278,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             intent.putExtra("question", mQuestionArrayList[position])
             startActivity(intent)
         }
-
-
-
 
 
     }
@@ -304,34 +305,43 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val id = item.itemId
         val fab = findViewById<FloatingActionButton>(R.id.fab)
 
+        // ログイン済みのユーザーを取得する
+        val user = FirebaseAuth.getInstance().currentUser
+
+
+
         if (id == R.id.nav_hobby) {
             mToolbar.title = "趣味"
             mGenre = 1
             fab.show()
+
+
         } else if (id == R.id.nav_life) {
             mToolbar.title = "生活"
             mGenre = 2
             fab.show()
+
         } else if (id == R.id.nav_health) {
             mToolbar.title = "健康"
             mGenre = 3
             fab.show()
+
+
         } else if (id == R.id.nav_compter) {
             mToolbar.title = "コンピューター"
             mGenre = 4
             fab.show()
-        }
 
-          else if (id == R.id.nav_favorite) {
-        mToolbar.title = "お気に入り"
-        mGenre = 5
+
+        } else if (id == R.id.nav_favorite) {
+            mToolbar.title = "お気に入り"
+            mGenre = 5
+
 
             val userId = FirebaseAuth.getInstance().currentUser!!.uid
 
 
-
             var favoritedata = FirebaseDatabase.getInstance().reference.child("favorite").child(userId)
-
 
 
             // 選択したジャンルにリスナーを登録する
@@ -342,13 +352,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             favoritedata!!.addChildEventListener(mFavoriteEventListener)
 
-
             fab.hide() // 表示しない
 
-            }
-
-
-
+        }
 
 
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
@@ -363,7 +369,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (mGenreRef != null) {
             mGenreRef!!.removeEventListener(mEventListener)
         }
-        if(mGenre != 5) {
+        if (mGenre != 5) {
             mGenreRef = mDatabaseReference.child(ContentsPATH).child(mGenre.toString())
 
             mGenreRef!!.addChildEventListener(mEventListener)
@@ -371,6 +377,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return true
     }
 
+    override fun onResume() {
+        super.onResume()
+        // ログイン済みのユーザーを取得する
+        val user = FirebaseAuth.getInstance().currentUser
+
+        val favorite = findViewById<DrawerLayout>(R.id.nav_favorite)
+
+        if (user == null) {
+            favorite.setVisibility(View.INVISIBLE) // 表示しない
 
 
+        } else {
+            favorite.setVisibility(View.VISIBLE) // 表示
+
+
+        }
+    }
 }
+
+

@@ -47,7 +47,6 @@ class QuestionDetailActivity : AppCompatActivity() {
             }
 
 
-
             val body = map["body"] ?: ""
             val name = map["name"] ?: ""
             val uid = map["uid"] ?: ""
@@ -73,6 +72,7 @@ class QuestionDetailActivity : AppCompatActivity() {
 
         }
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_question_detail)
@@ -109,51 +109,53 @@ class QuestionDetailActivity : AppCompatActivity() {
 
         val database = FirebaseDatabase.getInstance()
 
+        // ログイン済みのユーザーを取得する
+        val user = FirebaseAuth.getInstance().currentUser
 
-        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+        if (user != null) {
 
-
-
-
-        FirebaseDatabase.getInstance().reference.child("favorite").child(userId).child(mQuestion.questionUid).child("genre").addListenerForSingleValueEvent(
-            object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    // Get user value
-                    val user = dataSnapshot.getValue(userId::class.java)
-
-                   if(user == null) {
-                       flag = true
+            val userId = FirebaseAuth.getInstance().currentUser!!.uid
 
 
-                       val buttonTextView = button.findViewById<View>(R.id.button) as Button
+            FirebaseDatabase.getInstance().reference.child("favorite").child(userId).child(mQuestion.questionUid)
+                .child("genre").addListenerForSingleValueEvent(
+                    object : ValueEventListener {
+                        override fun onDataChange(dataSnapshot: DataSnapshot) {
+                            // Get user value
+                            val user = dataSnapshot.getValue(userId::class.java)
 
-                       buttonTextView.text = ("お気に入り")
-
-                       Log.d("TAG", "まだお気に入りにしていない")
-                   }else{
-                       flag = false
-
-                       val buttonTextView = button.findViewById<View>(R.id.button) as Button
-                       buttonTextView.text = ("お気に入り済み")
-
-                       Log.d("TAG","お気に入り済み")
-                   }
-
-                }
-
-                override fun onCancelled(databaseError: DatabaseError) {
+                            if (user == null) {
+                                flag = true
 
 
+                                val buttonTextView = button.findViewById<View>(R.id.button) as Button
 
-                }
-            })
+                                buttonTextView.text = ("お気に入り")
+
+                                Log.d("TAG", "まだお気に入りにしていない")
+                            } else {
+                                flag = false
+
+                                val buttonTextView = button.findViewById<View>(R.id.button) as Button
+                                buttonTextView.text = ("お気に入り済み")
+
+                                Log.d("TAG", "お気に入り済み")
+                            }
+
+                        }
+
+                        override fun onCancelled(databaseError: DatabaseError) {
+
+
+                        }
+                    })
+
+        }
 
 
         button.setOnClickListener {
 
             val database = FirebaseDatabase.getInstance()
-
-
 
 
             val ref = database.getReference("favorite")
@@ -163,15 +165,13 @@ class QuestionDetailActivity : AppCompatActivity() {
 
 
 
-            if(flag){
+            if (flag) {
 
 
                 val buttonTextView = button.findViewById<View>(R.id.button) as Button
 
                 buttonTextView.text = ("お気に入り")
                 flag = false
-
-
 
 
                 // ログイン済みのユーザーを取得する
@@ -185,16 +185,11 @@ class QuestionDetailActivity : AppCompatActivity() {
                 ref.child(userId).child(mQuestion.questionUid).child("genre").removeValue()
 
 
-
-
-
-            }else{
+            } else {
 
                 val buttonTextView = button.findViewById<View>(R.id.button) as Button
                 buttonTextView.text = ("お気に入り済み")
                 flag = true
-
-
 
 
                 // ログイン済みのユーザーを取得する
@@ -208,25 +203,7 @@ class QuestionDetailActivity : AppCompatActivity() {
                 ref.child(userId).child(mQuestion.questionUid).child("genre").setValue(mQuestion.genre.toString())
 
 
-
             }
-
-
-
-
-        }
-
-
-
-        val user = FirebaseAuth.getInstance().currentUser
-
-        if(user == null ){
-            button.setVisibility(View.INVISIBLE) // 表示しない
-
-
-        }
-        else{
-            button.setVisibility(View.VISIBLE) // 表示
 
 
         }
@@ -234,7 +211,24 @@ class QuestionDetailActivity : AppCompatActivity() {
 
 
         val dataBaseReference = FirebaseDatabase.getInstance().reference
-        mAnswerRef = dataBaseReference.child(ContentsPATH).child(mQuestion.genre.toString()).child(mQuestion.questionUid).child(AnswersPATH)
+        mAnswerRef =
+            dataBaseReference.child(ContentsPATH).child(mQuestion.genre.toString()).child(mQuestion.questionUid)
+                .child(AnswersPATH)
         mAnswerRef.addChildEventListener(mEventListener)
+    }
+
+    override fun onResume(){
+        super.onResume()
+        val user = FirebaseAuth.getInstance().currentUser
+
+        if (user == null) {
+            button.setVisibility(View.INVISIBLE) // 表示しない
+
+
+        } else {
+            button.setVisibility(View.VISIBLE) // 表示
+
+
+        }
     }
 }
