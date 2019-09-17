@@ -379,18 +379,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onResume() {
         super.onResume()
+
         // ログイン済みのユーザーを取得する
         val user = FirebaseAuth.getInstance().currentUser
+        val navigationView = findViewById(R.id.nav_view) as NavigationView
+        val favorite = navigationView.menu.findItem(R.id.nav_favorite)
 
-        val favorite = findViewById<DrawerLayout>(R.id.nav_favorite)
 
         if (user == null) {
-            favorite.setVisibility(View.INVISIBLE) // 表示しない
+            favorite.setVisible(false) // 表示しない
 
 
         } else {
-            favorite.setVisibility(View.VISIBLE) // 表示
-
+            favorite.setVisible(true) // 表示
 
         }
     }
