@@ -185,14 +185,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     var isQuestionExists = false
                     mQuestionArrayList.map {
                         // 各要素で行う処理
-                        if (question.questionUid != it.questionUid) {
-
-                            isQuestionExists = false
-                        } else {
+                        
+                        if (question.questionUid == it.questionUid) {
                             isQuestionExists = true
                         }
                     }
-                    
+
                     if (isQuestionExists == false) {
 
 
@@ -251,7 +249,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             } else {
                 // ジャンルを渡して質問作成画面を起動する
                 val intent = Intent(applicationContext, QuestionSendActivity::class.java)
-
 
                 intent.putExtra("genre", mGenre)
 
