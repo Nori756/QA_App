@@ -42,9 +42,11 @@ class QuestionSendActivity : AppCompatActivity(), View.OnClickListener, Database
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_question_send)
 
-        // 渡ってきたジャンルの番号を保持する
-        val extras = intent.extras
-        mGenre = extras.getInt("genre")
+
+            // 渡ってきたジャンルの番号を保持する
+            val extras = intent.extras
+
+            mGenre = extras.getInt("genre")
 
         // UIの準備
         title = "質問作成"
