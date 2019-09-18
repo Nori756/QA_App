@@ -192,8 +192,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             isQuestionExists = true
                         }
                     }
-
-
+                    
                     if (isQuestionExists == false) {
 
 
@@ -362,7 +361,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
             favoritedata!!.addChildEventListener(mFavoriteEventListener)
-
             fab.hide() // 表示しない
 
         }
@@ -403,6 +401,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val user = FirebaseAuth.getInstance().currentUser
         val navigationView = findViewById(R.id.nav_view) as NavigationView
         val favorite = navigationView.menu.findItem(R.id.nav_favorite)
+
+
 
 
         if (user == null) {
